@@ -4,10 +4,12 @@ html, body {
 	font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
 	font-size: 14px;
 /*	border: 1px solid red; */
+	height: 100vh;
+	width: 100vw;
 }
 
 .footer {
-	padding: 5px;
+	padding: 5px 0;
 	width: 100%;
 	text-align: center;
 	font-size: 16px;
@@ -18,4 +20,32 @@ a {
   color: #03739c;
   text-decoration: none;
 }
+
+/*     header      */
+
+.row-top{
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(2, 1fr);
+}
+
+.top-img{
+	grid-column: 1 / span 1;
+	grid-row: 1 / span 1;
+}
+
+.accessibility{
+	grid-column: 3 / span 1;
+	grid-row: 1 / span 1;
+	text-align: right;
+}
+
+.row-top > h1{
+	grid-column: 2 / span 1;
+	grid-row: 2 / span 1;
+	text-align: center;
+}
+
+
 
