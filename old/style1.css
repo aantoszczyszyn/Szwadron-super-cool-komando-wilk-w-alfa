@@ -23,7 +23,7 @@ a {
 
 /*     header      */
 
-.row-top{
+header{
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -44,8 +44,7 @@ a {
 	grid-row: 1 / span 1;
 	text-align: right;
 }
-
-.row-top > h1{
+header > h1{
 	grid-column: 2 / span 1;
 	grid-row: 2 / span 1;
 	text-align: center;
