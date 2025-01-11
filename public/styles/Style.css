@@ -1,0 +1,101 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 14px;
+    background: linear-gradient(to bottom left, #008000, #c9ccdf, #1f1fb8);
+    color: black;
+    height: 100vh;
+    width: 100vw;
+}
+
+/*      header      */
+
+header{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+}
+
+.top-img{
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+}
+
+.top-img > img{
+    width: 80%;
+}
+
+.accessibility{
+    grid-column: 3 / span 1;
+    grid-row: 1 / span 1;
+    text-align: right;
+    margin: 5px;
+
+}
+
+.accessibility button{
+    padding: 5px;
+    font-size: 14px;
+    border-radius: 10px;
+    border: none;
+    box-sizing: border-box;
+    background: white;
+}
+
+.accessibility button:hover{
+    border: 1px solid #424242;
+}
+
+header > h1{
+    grid-column: 2 / span 1;
+    grid-row: 1 / span 1;
+    text-align: center;
+}
+
+footer {
+    padding: 5px 0;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/*      end header       */
+/*      ScheduleInputs      */
+
+#searchForm{
+    border-radius: 15px;
+    background-color: white;
+    padding: 10px 10px;
+    justify-self: right;
+    margin-right: 3%;
+    font-size: 21px;
+}
+
+.form-group{
+    margin: 10px;
+
+}
+
+.form-group input{
+    background-color: #9f9d9d;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.form-group input::placeholder {
+    color: white;
+}
+
+.form-group input:focus{
+    outline: none;
+    background-color: #d6d4d4;
+}
+
+.form-group label{
+
+}
