@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Aplikacje Internetowe",
+    "start": "2024-10-01T11:00:00+02:00",
+    "room": "WI1-215",
+    "teacher": "Karczmarczyk Artur"
+  },
+  {
+    "title": "Programowanie Obiektowe",
+    "start": "2024-10-01T13:00:00+02:00",
+    "room": "WI1-210",
+    "teacher": "Karczmarczyk Artur"
+  }
+]
