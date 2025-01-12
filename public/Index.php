@@ -20,10 +20,12 @@ $router->addRoute('/', Controller::class, 'showIndex');
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Nowy lepszy plan ZUT 2025</title>
-        <link rel="stylesheet" href="styles/style.css">
+        <link rel="stylesheet" href="styles/Style.css">
+        <link rel="stylesheet" href="styles/Schedule.css">
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     </head>
     <body>
+
         <?php
             try {
                 // Przekierowanie żądania na odpowiednią akcję kontrolera
@@ -32,6 +34,8 @@ $router->addRoute('/', Controller::class, 'showIndex');
                 die('Wystąpił błąd: ' . $e->getMessage());
             }
         ?>
+
+        </main>
         <footer>
             ZUT 2025
         </footer>
