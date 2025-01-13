@@ -11,6 +11,7 @@ class Controller{
 
     public function showIndex(){
         include __DIR__ . '/../Views/Header/Header.php';
+        include __DIR__ . '/../Views/Schedule/Schedule.php';
         include __DIR__ . '/../Views/Schedule/Inputs.php';
 
     }

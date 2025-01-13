@@ -43,4 +43,3 @@
     </div>
 </form>
 
-<div id='calendar'></div>

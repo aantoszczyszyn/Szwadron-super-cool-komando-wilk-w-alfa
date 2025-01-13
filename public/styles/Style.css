@@ -60,18 +60,35 @@ footer {
     text-align: center;
     font-size: 16px;
     font-weight: bold;
+
 }
 
 /*      end header       */
 /*      ScheduleInputs      */
 
+main{
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+}
+
+#calendar {
+    width: 50%;
+    height: auto;
+    grid-column: 2 / span 10;
+    grid-row: 1 / span 1;
+}
+
+
 #searchForm{
     border-radius: 15px;
     background-color: white;
-    padding: 10px 10px;
-    justify-self: right;
-    margin-right: 3%;
+    padding: 10px;
     font-size: 21px;
+    height: 496px;
+    grid-column: 8 / span 1;
+    grid-row: 1 / span 1;
+    margin-top: 60px;
 }
 
 .form-group{
@@ -96,6 +113,7 @@ footer {
     background-color: #d6d4d4;
 }
 
-.form-group label{
 
-}
+/*      end ScheduleInputs      */
+/*      Schedule        */
+

@@ -1,0 +1,23 @@
+
+
+.fc-scrollgrid  {
+    background-color: #ecd8cb;  /* Dodanie !important */
+}
+
+.fc-scrollgrid-section-header {
+    background-color: #1b2b67;
+    color: white;
+}
+
+.fc-timegrid-slot-label{
+    background-color: #1b2b67;
+    color: white;
+}
+
+.fc-timegrid-slot.fc-timegrid-slot-lane.fc-timegrid-slot-minor {
+    border-bottom: 1px solid #1b2b67;
+}
+
+.fc-timegrid-slot.fc-timegrid-slot-lane{
+    border-bottom: 1px dashed #1b2b67;
+}
