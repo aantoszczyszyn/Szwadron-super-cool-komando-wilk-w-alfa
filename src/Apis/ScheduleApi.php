@@ -15,7 +15,6 @@ class ScheduleApi
     public function __construct()
     {
         global $config;
-        // Inicjalizacja połączenia z bazą danych
         try {
             $this->pdo = new PDO(
                 $config['db_dsn'],
@@ -28,14 +27,8 @@ class ScheduleApi
         }
     }
 
-    /**
-     * Główna metoda obsługująca zapytania użytkownika.
-     * @param array $inputs Tablica wejściowych danych (filtry).
-     * @return string JSON z wynikami zapytania.
-     */
     public function getSchedule(array $inputs): string
     {
-        // Przygotowanie filtrów
         $whereClauses = [];
         $params = [];
 
@@ -59,14 +52,8 @@ class ScheduleApi
             $params[':group_name'] = '%' . $inputs['group_name'] . '%';
         }
 
-        // Sprawdzenie czy są filtry
         $whereSql = $whereClauses ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
-        if($whereSql === ''){
-            return '';
-        }
-
-        // Zapytanie do bazy danych
         $sql = "
             SELECT s.schedule_id, subj.subject_name, w.worker_name, g.group_name, s.room, 
                    s.start_time, s.end_time, s.lesson_status, s.color 
@@ -83,7 +70,6 @@ class ScheduleApi
         $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Jeśli brak wyników, wykonaj zapytanie zewnętrzne
         if (empty($results)) {
             $results = $this->fetchExternalSchedule($inputs);
         }
@@ -91,14 +77,8 @@ class ScheduleApi
         return json_encode($results);
     }
 
-    /**
-     * Pobranie danych z zewnętrznego API, zapisanie ich do bazy i zwrócenie.
-     * @param array $inputs Filtry (np. teacher, student_id).
-     * @return array Wyniki jako tablica.
-     */
     private function fetchExternalSchedule(array $inputs): array
     {
-        // Przygotowanie URL na podstawie dostępnych danych
         $baseUrl = "https://plan.zut.edu.pl/schedule_student.php";
         $params = [];
 
@@ -122,122 +102,111 @@ class ScheduleApi
             $params[] = 'number=' . urlencode($inputs['student_id']);
         }
 
-        //trzeba jakos czas z forntu przekazyawc
-//        $params[] = 'start=' . urlencode($inputs['start_time']."T00:00:00+01:00");
-//        $params[] = 'end=' . urlencode($inputs['end_time']."T00:00:00+01:00");
+        $params[] = 'start=' . urlencode("2025-01-13T00:00:00+01:00");
+        $params[] = 'end=' . urlencode("2025-01-21T00:00:00+01:00");
 
-        $params[] = 'start=' . urlencode("2024-01-13T00:00:00+01:00");
-        $params[] = 'end=' . urlencode("2024-01-21T00:00:00+01:00");
-
-        // Tworzenie URL-a z zachowaną kolejnością
         $url = $baseUrl . '?' . implode('&', $params);
+        $response = @file_get_contents($url);
 
-        echo $url;
+        if ($response === false) {
+            throw new Exception("Błąd połączenia z API planu ZUT. URL: $url");
+        }
 
-        // Wykonanie zapytania HTTP
-        $response = file_get_contents($url);
         $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("Błąd dekodowania JSON z API planu ZUT.");
+        }
 
-        // Zapisanie do bazy danych
         $this->saveStudentToDatabase($inputs['student_id']);
-
-        // Sprawdzanie, co zawiera odpowiedź
-//        echo '<pre>';
-//        print_r($data);
-//        echo '</pre>';
 
         foreach ($data as $lesson) {
             if (empty($lesson)) {
-                continue; // na jakies dziwne puste miejsce jako pierwsze
+                continue;
+            }
+
+            if (empty($lesson['group_name'])) {
+                throw new Exception("Brak group_name w danych lekcji pobranych z API.");
             }
 
             $this->saveLessonToDatabase($lesson);
-            $this->saveStudentGroup($inputs['student_id'], $lesson['group_id']);
+            $this->saveStudentGroup($inputs['student_id'], $lesson['group_name']);
         }
 
         return $data;
     }
 
-    /**
-     * Zapisanie danych z zewnętrznego API do bazy danych.
-     * @param array $lesson Dane pojedynczych zajęć.
-     */
     private function saveLessonToDatabase(array $lesson): void
     {
         $this->pdo->beginTransaction();
         try {
-            // Dodawanie grupy
+            if (empty($lesson['group_name'])) {
+                throw new Exception("Brak group_name w danych lekcji. Nie można zapisać.");
+            }
+
             $groupSql = "
-        INSERT OR IGNORE INTO groups (group_name) 
-        VALUES (:group_name)
-        ";
+                INSERT OR IGNORE INTO groups (group_name) 
+                VALUES (:group_name)
+            ";
             $groupStmt = $this->pdo->prepare($groupSql);
             $groupStmt->execute([':group_name' => $lesson['group_name']]);
 
-            // Dodawanie przedmiotu
-            $subjectSql = "
-        INSERT OR IGNORE INTO subjects (subject_name, lesson_form, lesson_form_short) 
-        VALUES (:subject_name, :lesson_form, :lesson_form_short)
-        ";
-            $subjectStmt = $this->pdo->prepare($subjectSql);
-            $subjectStmt->execute([
-                ':subject_name' => $lesson['title'],
-                ':lesson_form' => $lesson['lesson_form'],
-                ':lesson_form_short' => $lesson['lesson_form_short']
-            ]);
-
-            // Pobieranie subject_id
             $subjectIdQuery = "
-        SELECT subject_id 
-        FROM subjects 
-        WHERE subject_name = :subject_name
-        ";
+                SELECT subject_id 
+                FROM subjects 
+                WHERE subject_name = :subject_name
+            ";
             $subjectIdStmt = $this->pdo->prepare($subjectIdQuery);
             $subjectIdStmt->execute([':subject_name' => $lesson['title']]);
             $subjectId = $subjectIdStmt->fetchColumn();
 
             if (!$subjectId) {
-                throw new Exception("Nie znaleziono subject_id dla przedmiotu: " . $lesson['title']);
+                $insertSubjectSql = "
+                    INSERT INTO subjects (subject_name, lesson_form, lesson_form_short) 
+                    VALUES (:subject_name, :lesson_form, :lesson_form_short)
+                ";
+                $insertSubjectStmt = $this->pdo->prepare($insertSubjectSql);
+                $insertSubjectStmt->execute([
+                    ':subject_name' => $lesson['title'],
+                    ':lesson_form' => $lesson['lesson_form'] ?? "N/A",
+                    ':lesson_form_short' => $lesson['lesson_form_short'] ?? "N/A"
+                ]);
+                $subjectId = $this->pdo->lastInsertId();
             }
 
-            // Dodawanie pracownika
-            $workerSql = "
-        INSERT OR IGNORE INTO workers (worker_name, title) 
-        VALUES (:worker_name, :title)
-        ";
-            $workerStmt = $this->pdo->prepare($workerSql);
-            $workerStmt->execute([
-                ':worker_name' => $lesson['worker'],
-                ':title' => $lesson['worker_title']
-            ]);
-
-            // Pobieranie worker_id
             $workerIdQuery = "
-        SELECT worker_id 
-        FROM workers 
-        WHERE worker_name = :worker_name
-        ";
+                SELECT worker_id 
+                FROM workers 
+                WHERE worker_name = :worker_name
+            ";
             $workerIdStmt = $this->pdo->prepare($workerIdQuery);
             $workerIdStmt->execute([':worker_name' => $lesson['worker']]);
             $workerId = $workerIdStmt->fetchColumn();
 
             if (!$workerId) {
-                throw new Exception("Nie znaleziono worker_id dla pracownika: " . $lesson['worker']);
+                $insertWorkerSql = "
+                    INSERT INTO workers (worker_name, title) 
+                    VALUES (:worker_name, :title)
+                ";
+                $insertWorkerStmt = $this->pdo->prepare($insertWorkerSql);
+                $insertWorkerStmt->execute([
+                    ':worker_name' => $lesson['worker'],
+                    ':title' => $lesson['worker_title'] ?? "Brak tytułu"
+                ]);
+                $workerId = $this->pdo->lastInsertId();
             }
 
-            // Dodawanie do harmonogramu
             $scheduleSql = "
-        INSERT INTO schedule (
-            subject_id, worker_id, group_name, room, 
-            start_time, end_time, lesson_status, 
-            lesson_status_short, color, border_color
-        )
-        VALUES (
-            :subject_id, :worker_id, :group_name, :room, 
-            :start_time, :end_time, :lesson_status, 
-            :lesson_status_short, :color, :border_color
-        )
-        ";
+                INSERT INTO schedule (
+                    subject_id, worker_id, group_name, room, 
+                    start_time, end_time, lesson_status, 
+                    lesson_status_short, color, border_color
+                )
+                VALUES (
+                    :subject_id, :worker_id, :group_name, :room, 
+                    :start_time, :end_time, :lesson_status, 
+                    :lesson_status_short, :color, :border_color
+                )
+            ";
             $scheduleStmt = $this->pdo->prepare($scheduleSql);
             $scheduleStmt->execute([
                 ':subject_id' => $subjectId,
@@ -246,10 +215,10 @@ class ScheduleApi
                 ':room' => $lesson['room'],
                 ':start_time' => $lesson['start'],
                 ':end_time' => $lesson['end'],
-                ':lesson_status' => $lesson['lesson_status'],
-                ':lesson_status_short' => $lesson['lesson_status_short'],
-                ':color' => $lesson['color'],
-                ':border_color' => $lesson['borderColor']
+                ':lesson_status' => $lesson['lesson_status'] ?? "planned",
+                ':lesson_status_short' => $lesson['lesson_status_short'] ?? "PL",
+                ':color' => $lesson['color'] ?? "#FFFFFF",
+                ':border_color' => $lesson['borderColor'] ?? "#000000"
             ]);
 
             $this->pdo->commit();
@@ -259,34 +228,28 @@ class ScheduleApi
         }
     }
 
-
     function saveStudentToDatabase($student_id): void
     {
-        $this->pdo->beginTransaction();
-        try {
-            // Dodawanie studenta jeśli jeszcze nie istnieje
-            $studentSql = "
+        $studentSql = "
             INSERT OR REPLACE INTO students (student_id) 
             VALUES (:student_id)
         ";
-            $studentStmt = $this->pdo->prepare($studentSql);
-            $studentStmt->execute([':student_id' => $student_id]);
-            $this->pdo->commit();
-        } catch (Exception $e) {
-            $this->pdo->rollBack();
-            throw new Exception("Błąd zapisu danych studenta: " . $e->getMessage());
-        }
+        $stmt = $this->pdo->prepare($studentSql);
+        $stmt->execute([':student_id' => $student_id]);
     }
 
     function saveStudentGroup($student_id, $group_name): void
     {
+        if (empty($group_name)) {
+            throw new Exception("Brak group_name. Nie można zapisać grupy studenta.");
+        }
+
         $this->pdo->beginTransaction();
         try {
-            // Powiązanie studenta z grupą
             $studentGroupSql = "
-            INSERT OR REPLACE INTO student_group (student_id, group_name)
-            VALUES (:student_id, (SELECT group_name FROM groups WHERE group_name = :group_name))
-        ";
+                INSERT OR REPLACE INTO student_group (student_id, group_name)
+                VALUES (:student_id, :group_name)
+            ";
             $studentGroupStmt = $this->pdo->prepare($studentGroupSql);
             $studentGroupStmt->execute([
                 ':student_id' => $student_id,
@@ -300,13 +263,12 @@ class ScheduleApi
     }
 }
 
-try{
+try {
     $sApi = new ScheduleApi();
     $res = $sApi->getSchedule([
         'student_id' => 53967
     ]);
-
     echo $res;
-} catch (PDOException $e) {
+} catch (Exception $e) {
     echo $e->getMessage();
 }
