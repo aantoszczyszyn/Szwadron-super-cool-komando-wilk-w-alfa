@@ -39,6 +39,6 @@ $router->addRoute('/', Controller::class, 'showIndex');
         <footer>
             ZUT 2025
         </footer>
-        <script type="module" src="/scripts/Script.js"></script>
+        <script type="module" src="/scripts/Calendar.js"></script>
     </body>
 </html>
