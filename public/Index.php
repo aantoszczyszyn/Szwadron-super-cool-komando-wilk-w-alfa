@@ -23,6 +23,7 @@ $router->addRoute('/', Controller::class, 'showIndex');
         <link rel="stylesheet" href="styles/Style.css">
         <link rel="stylesheet" href="styles/Schedule.css">
         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+        <script type="module" src="/scripts/Calendar.js" defer></script>
     </head>
     <body>
 
@@ -39,6 +40,6 @@ $router->addRoute('/', Controller::class, 'showIndex');
         <footer>
             ZUT 2025
         </footer>
-        <script type="module" src="/scripts/Calendar.js"></script>
+
     </body>
 </html>

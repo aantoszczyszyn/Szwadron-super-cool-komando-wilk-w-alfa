@@ -4,22 +4,22 @@
 
 <form id="searchForm" method="POST">
     <div class="form-group">
-        <label for="studentNumber">Numer albumu studenta</label><br>
+        <label for="student_id">Numer albumu studenta</label><br>
         <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Podaj numer albumu">
     </div>
 
     <div class="form-group">
-        <label for="teacherName">Nazwisko prowadzącego</label><br>
+        <label for="worker_name">Nazwisko prowadzącego</label><br>
         <input type="text" class="form-control" id="worker_name" name="worker_name" placeholder="Podaj nazwisko">
     </div>
 
     <div class="form-group">
-        <label for="subject">Przedmiot</label><br>
+        <label for="subject_name">Przedmiot</label><br>
         <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Podaj przedmiot">
     </div>
 
     <div class="form-group">
-        <label for="group">Grupa</label><br>
+        <label for="group_name">Grupa</label><br>
         <input type="text" class="form-control" id="group_name" name="group_name" placeholder="Podaj grupę">
     </div>
 

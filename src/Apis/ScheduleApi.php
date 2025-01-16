@@ -2,7 +2,7 @@
 
 namespace App\Apis;
 
-require __DIR__ . '/../../config/config.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/../config/config.php';
 
 use PDO;
 use PDOException;
@@ -14,7 +14,9 @@ class ScheduleApi
 
     public function __construct()
     {
-        global $config;
+        require $_SERVER['DOCUMENT_ROOT'] . '/../config/config.php';
+
+        $config;
         try {
             $this->pdo = new PDO(
                 $config['db_dsn'],
@@ -263,12 +265,12 @@ class ScheduleApi
     }
 }
 
-try {
-    $sApi = new ScheduleApi();
-    $res = $sApi->getSchedule([
-        'student_id' => 53967
-    ]);
-    echo $res;
-} catch (Exception $e) {
-    echo $e->getMessage();
-}
+// try {
+//     $sApi = new ScheduleApi();
+//     $res = $sApi->getSchedule([
+//         'student_id' => 53967
+//     ]);
+//     echo $res;
+// } catch (Exception $e) {
+//     echo $e->getMessage();
+// }

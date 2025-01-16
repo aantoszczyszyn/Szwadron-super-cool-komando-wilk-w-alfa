@@ -13,6 +13,7 @@ class Controller{
         include __DIR__ . '/../Views/Header/Header.php';
         include __DIR__ . '/../Views/Schedule/Schedule.php';
         include __DIR__ . '/../Views/Schedule/Inputs.php';
+        include __DIR__ . '/../Views/Events/Events.php';
 
     }
 

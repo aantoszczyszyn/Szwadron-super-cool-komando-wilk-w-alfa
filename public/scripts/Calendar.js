@@ -1,8 +1,18 @@
+let eventData = {
+    title: 'Przykład, test',
+    start: '2025-01-16T15:00:00',
+    end: '2025-01-16T16:00:00',
+    description: 'event.description',
+    color: 'event.color'
+};
+
+let calendar;
+let calendarEl;
 
 // załadowanie kalendarza
 document.addEventListener('DOMContentLoaded', function () {
-    const calendarEl = document.getElementById('calendar');
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'timeGridWeek',         // Widok tygodniowy
         headerToolbar: {
             left: 'prev,next today',
@@ -15,17 +25,18 @@ document.addEventListener('DOMContentLoaded', function () {
         allDaySlot: false,
         firstDay: 1,
         height: 626,
-        events: [
-            {
-                title: 'Przykład, test',
-                start: '2025-01-06T10:00:00',
-                end: '2025-01-06T12:00:00',
-            },
-        ],
+
     });
+    window.calendar = calendar;
     calendar.render();
 
+    calendar.addEvent(eventData);
+
 });
+
+
+
+
 
 
 
